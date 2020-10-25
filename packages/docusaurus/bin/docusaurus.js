@@ -18,6 +18,7 @@ const {
   start,
   externalCommand,
   serve,
+  clear,
 } = require('../lib');
 const requiredVersion = require('../package.json').engines.node;
 const pkg = require('../package.json');
@@ -145,8 +146,8 @@ cli
   )
   .option('--no-open', 'Do not open page in the browser (default: false)')
   .option(
-    '--poll',
-    'Use polling rather than watching for reload (default: false)',
+    '--poll [interval]',
+    'Use polling rather than watching for reload (default: false). Can specify a poll interval in milliseconds.',
   )
   .action((siteDir = '.', {port, host, hotOnly, open, poll}) => {
     wrapCommand(start)(path.resolve(siteDir), {
@@ -187,6 +188,13 @@ cli
     },
   );
 
+cli
+  .command('clear')
+  .description('Remove build artifacts')
+  .action(() => {
+    wrapCommand(clear)(path.resolve('.'));
+  });
+
 cli.arguments('<command>').action((cmd) => {
   cli.outputHelp();
   console.log(`  ${chalk.red(`\n  Unknown command ${chalk.yellow(cmd)}.`)}`);
@@ -194,7 +202,9 @@ cli.arguments('<command>').action((cmd) => {
 });
 
 function isInternalCommand(command) {
-  return ['start', 'build', 'swizzle', 'deploy'].includes(command);
+  return ['start', 'build', 'swizzle', 'deploy', 'serve', 'clear'].includes(
+    command,
+  );
 }
 
 if (!isInternalCommand(process.argv.slice(2)[0])) {
